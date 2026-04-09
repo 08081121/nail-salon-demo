@@ -1,15 +1,15 @@
 from flask import Flask, request, jsonify
-import os  # để lấy port từ environment
+import os  # để lấy port từ environment Render
 
 # Tạo app Flask
-app = Flask(_name_)
+app = Flask(_name_)  # ✅ dùng _name_ chuẩn
 
 # Route chính để kiểm tra app
 @app.route("/")
 def home():
     return "💅 Edmonton Nail Salon Chatbot is running!"
 
-# Route demo chatbot
+# Route chatbot demo
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.json
