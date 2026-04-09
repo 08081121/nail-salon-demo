@@ -1,10 +1,10 @@
 from flask import Flask, request, jsonify
-import os  # để lấy port từ environment Render
+import os  # để lấy PORT từ environment Render
 
-# Tạo app Flask
-app = Flask(_name_)  # ✅ dùng _name_ chuẩn
+# Tạo app Flask, chính xác _name_
+app = Flask(_name_)  # ✅ KHÔNG name hay _Name_
 
-# Route chính để kiểm tra app
+# Route chính để kiểm tra app chạy live
 @app.route("/")
 def home():
     return "💅 Edmonton Nail Salon Chatbot is running!"
@@ -12,11 +12,11 @@ def home():
 # Route chatbot demo
 @app.route("/chat", methods=["POST"])
 def chat():
-    data = request.json
+    data = request.get_json()  # lấy JSON từ POST
     if not data or "message" not in data:
         return jsonify({"reply": "Please send a message in JSON format."})
 
-    user_message = data["message"].lower()
+    user_message = data["message"].lower()  # chuẩn hóa chữ thường
 
     if "hello" in user_message or "hi" in user_message:
         reply = "Hi 👋 Welcome to Edmonton Nail Salon! How can we help you today?"
@@ -41,7 +41,7 @@ def chat():
 
     return jsonify({"reply": reply})
 
-# Chạy app trên Render
+# Chạy app trên Render, lấy PORT từ environment
 if _name_ == "_main_":
     port = int(os.environ.get("PORT", 10000))  # lấy port Render cấp
     app.run(host="0.0.0.0", port=port)
