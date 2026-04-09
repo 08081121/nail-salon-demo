@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
 import os  # để lấy PORT từ environment Render
 
-# Tạo app Flask, chính xác _name_
-app = Flask(_name_)  # ✅ KHÔNG name hay _Name_
+# ✅ Tạo app Flask chính xác _name_
+app = Flask(_name_)
 
 # Route chính để kiểm tra app chạy live
 @app.route("/")
@@ -16,7 +16,7 @@ def chat():
     if not data or "message" not in data:
         return jsonify({"reply": "Please send a message in JSON format."})
 
-    user_message = data["message"].lower()  # chuẩn hóa chữ thường
+    user_message = data["message"].lower()
 
     if "hello" in user_message or "hi" in user_message:
         reply = "Hi 👋 Welcome to Edmonton Nail Salon! How can we help you today?"
@@ -41,7 +41,7 @@ def chat():
 
     return jsonify({"reply": reply})
 
-# Chạy app trên Render, lấy PORT từ environment
+# Chạy app trên Render
 if _name_ == "_main_":
     port = int(os.environ.get("PORT", 10000))  # lấy port Render cấp
     app.run(host="0.0.0.0", port=port)
