@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
 import os  # để lấy PORT từ environment Render
 
-# Tạo app Flask, chính xác _name_
-app = Flask(_name_)  # ✅ KHÔNG name hay _Name_
+# ⚠️ Quan trọng: phải là _name_ (hai dấu gạch dưới 2 bên)
+app = Flask(_name_)
 
 # Route chính để kiểm tra app chạy live
 @app.route("/")
@@ -12,11 +12,11 @@ def home():
 # Route chatbot demo
 @app.route("/chat", methods=["POST"])
 def chat():
-    data = request.get_json()  # lấy JSON từ POST
+    data = request.get_json()
     if not data or "message" not in data:
         return jsonify({"reply": "Please send a message in JSON format."})
 
-    user_message = data["message"].lower()  # chuẩn hóa chữ thường
+    user_message = data["message"].lower()
 
     if "hello" in user_message or "hi" in user_message:
         reply = "Hi 👋 Welcome to Edmonton Nail Salon! How can we help you today?"
