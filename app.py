@@ -1,12 +1,15 @@
 from flask import Flask, request, jsonify
-import os  # Thêm để lấy port từ biến môi trường
+import os  # để lấy port từ environment
 
+# Tạo app Flask
 app = Flask(_name_)
 
+# Route chính để kiểm tra app
 @app.route("/")
 def home():
     return "💅 Edmonton Nail Salon Chatbot is running!"
 
+# Route demo chatbot
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.json
@@ -38,6 +41,7 @@ def chat():
 
     return jsonify({"reply": reply})
 
+# Chạy app trên Render
 if _name_ == "_main_":
-    port = int(os.environ.get("PORT", 10000))  # Lấy port từ Render
+    port = int(os.environ.get("PORT", 10000))  # lấy port Render cấp
     app.run(host="0.0.0.0", port=port)
