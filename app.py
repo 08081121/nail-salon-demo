@@ -1,13 +1,25 @@
 from flask import Flask, request, jsonify, render_template
-from openai import OpenAI
 import os
 
 app = Flask(__name__)
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+SALON_INFO = """
+💅 Nail Salon AI
 
-# lưu lịch sử chat đơn giản (RAM)
-chat_history = []
+📍 Address:
+123 Beauty Street, Vancouver, BC, Canada
+
+📞 Phone:
++1 604-123-4567
+
+💰 Prices:
+- Manicure: $20
+- Pedicure: $25
+- Gel Nails: $35
+- Nail Art: from $5+
+
+📅 Booking: Tell me what day & time you want
+"""
 
 @app.route("/")
 def home():
@@ -20,27 +32,28 @@ def chat():
     if not data or "message" not in data:
         return jsonify({"reply": "Please send a message"})
 
-    user_message = data["message"]
+    msg = data["message"].lower()
 
-    chat_history.append({"role": "user", "content": user_message})
+    if "hi" in msg or "hello" in msg:
+        reply = "Hello 👋 Welcome to Nail Salon 💅\n\n" + SALON_INFO
 
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a friendly and professional nail salon assistant in Canada. You help customers with services, pricing, and booking appointments. Keep replies short, friendly, and helpful."
-                }
-            ] + chat_history[-10:]  # nhớ 10 tin gần nhất
-        )
+    elif "price" in msg:
+        reply = "💰 Here are our prices:\n\n" + SALON_INFO
 
-        reply = response.choices[0].message.content
+    elif "phone" in msg or "contact" in msg:
+        reply = "📞 Contact us:\n\n" + SALON_INFO
 
-        chat_history.append({"role": "assistant", "content": reply})
+    elif "address" in msg or "where" in msg:
+        reply = "📍 Our location:\n\n" + SALON_INFO
 
-    except Exception as e:
-        reply = "Server busy 😢 please try again"
+    elif "book" in msg:
+        reply = "📅 Sure! Please tell me your preferred date and time 😊"
+
+    elif "service" in msg:
+        reply = "💅 We offer manicure, pedicure, gel nails, nail art!"
+
+    else:
+        reply = "💅 I can help you with booking, prices, address, and phone number."
 
     return jsonify({"reply": reply})
 
