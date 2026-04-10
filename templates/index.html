@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Nail Salon AI</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: linear-gradient(135deg, #ff758c, #ff7eb3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* container */
+.chat-container {
+    width: 380px;
+    height: 600px;
+    background: rgba(255,255,255,0.95);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* header */
+.chat-header {
+    background: #ff4d6d;
+    color: white;
+    padding: 15px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* chat box */
+.chat-box {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+/* message */
+.message {
+    display: flex;
+    margin: 10px 0;
+}
+
+.message.user {
+    justify-content: flex-end;
+}
+
+.bubble {
+    padding: 10px 14px;
+    border-radius: 15px;
+    max-width: 70%;
+}
+
+.user .bubble {
+    background: #007bff;
+    color: white;
+}
+
+.bot .bubble {
+    background: #eee;
+}
+
+/* typing */
+.typing {
+    font-size: 12px;
+    color: gray;
+}
+
+/* input */
+.chat-input {
+    display: flex;
+    border-top: 1px solid #ddd;
+}
+
+.chat-input input {
+    flex: 1;
+    border: none;
+    padding: 12px;
+}
+
+.chat-input button {
+    background: #ff4d6d;
+    color: white;
+    border: none;
+    padding: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">💅 Nail Salon AI</div>
+
+    <div id="chatBox" class="chat-box"></div>
+
+    <div class="chat-input">
+        <input id="msg" placeholder="Type message...">
+        <button onclick="send()">Send</button>
+    </div>
+</div>
+
+<script>
+function addMsg(text, type) {
+    const box = document.getElementById("chatBox");
+
+    const msg = document.createElement("div");
+    msg.className = "message " + type;
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.innerText = text;
+
+    msg.appendChild(bubble);
+    box.appendChild(msg);
+
+    box.scrollTop = box.scrollHeight;
+}
+
+function typing() {
+    const box = document.getElementById("chatBox");
+
+    const t = document.createElement("div");
+    t.id = "typing";
+    t.className = "typing";
+    t.innerText = "Typing...";
+
+    box.appendChild(t);
+    box.scrollTop = box.scrollHeight;
+}
+
+function removeTyping() {
+    const t = document.getElementById("typing");
+    if (t) t.remove();
+}
+
+function send() {
+    const input = document.getElementById("msg");
+    const text = input.value;
+
+    if (!text) return;
+
+    addMsg(text, "user");
+    input.value = "";
+
+    typing();
+
+    fetch("/chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({message: text})
+    })
+    .then(res => res.json())
+    .then(data => {
+        removeTyping();
+        addMsg(data.reply, "bot");
+    });
+}
+
+document.getElementById("msg").addEventListener("keypress", function(e){
+    if(e.key === "Enter") send();
+});
+</script>
+
+</body>
+</html>
