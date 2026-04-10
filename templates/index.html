@@ -15,19 +15,18 @@ body {
     height: 100vh;
 }
 
-/* container */
 .chat-container {
     width: 380px;
     height: 600px;
-    background: rgba(255,255,255,0.95);
+    background: white;
     border-radius: 20px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
 
-/* header */
-.chat-header {
+.header {
     background: #ff4d6d;
     color: white;
     padding: 15px;
@@ -35,20 +34,18 @@ body {
     font-weight: bold;
 }
 
-/* chat box */
 .chat-box {
     flex: 1;
     padding: 10px;
     overflow-y: auto;
 }
 
-/* message */
-.message {
+.msg {
+    margin: 8px 0;
     display: flex;
-    margin: 10px 0;
 }
 
-.message.user {
+.msg.user {
     justify-content: flex-end;
 }
 
@@ -67,29 +64,22 @@ body {
     background: #eee;
 }
 
-/* typing */
-.typing {
-    font-size: 12px;
-    color: gray;
-}
-
-/* input */
-.chat-input {
+.input-box {
     display: flex;
     border-top: 1px solid #ddd;
 }
 
-.chat-input input {
+input {
     flex: 1;
-    border: none;
     padding: 12px;
+    border: none;
 }
 
-.chat-input button {
+button {
     background: #ff4d6d;
     color: white;
     border: none;
-    padding: 12px;
+    padding: 12px 15px;
 }
 </style>
 </head>
@@ -97,60 +87,39 @@ body {
 <body>
 
 <div class="chat-container">
-    <div class="chat-header">💅 Nail Salon AI</div>
+    <div class="header">💅 Nail Salon AI</div>
 
-    <div id="chatBox" class="chat-box"></div>
+    <div id="chat" class="chat-box"></div>
 
-    <div class="chat-input">
+    <div class="input-box">
         <input id="msg" placeholder="Type message...">
         <button onclick="send()">Send</button>
     </div>
 </div>
 
 <script>
-function addMsg(text, type) {
-    const box = document.getElementById("chatBox");
+function add(text, type) {
+    const chat = document.getElementById("chat");
 
-    const msg = document.createElement("div");
-    msg.className = "message " + type;
+    const div = document.createElement("div");
+    div.className = "msg " + type;
 
     const bubble = document.createElement("div");
     bubble.className = "bubble";
     bubble.innerText = text;
 
-    msg.appendChild(bubble);
-    box.appendChild(msg);
+    div.appendChild(bubble);
+    chat.appendChild(div);
 
-    box.scrollTop = box.scrollHeight;
-}
-
-function typing() {
-    const box = document.getElementById("chatBox");
-
-    const t = document.createElement("div");
-    t.id = "typing";
-    t.className = "typing";
-    t.innerText = "Typing...";
-
-    box.appendChild(t);
-    box.scrollTop = box.scrollHeight;
-}
-
-function removeTyping() {
-    const t = document.getElementById("typing");
-    if (t) t.remove();
+    chat.scrollTop = chat.scrollHeight;
 }
 
 function send() {
     const input = document.getElementById("msg");
     const text = input.value;
-
     if (!text) return;
 
-    addMsg(text, "user");
-    input.value = "";
-
-    typing();
+    add(text, "user");
 
     fetch("/chat", {
         method: "POST",
@@ -159,13 +128,14 @@ function send() {
     })
     .then(res => res.json())
     .then(data => {
-        removeTyping();
-        addMsg(data.reply, "bot");
+        add(data.reply, "bot");
     });
+
+    input.value = "";
 }
 
 document.getElementById("msg").addEventListener("keypress", function(e){
-    if(e.key === "Enter") send();
+    if (e.key === "Enter") send();
 });
 </script>
 
