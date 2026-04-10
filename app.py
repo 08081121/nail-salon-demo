@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 import os
 
-app = Flask(_name_)
+app = Flask(__name__)
 
 @app.route("/")
 def home():
@@ -26,6 +26,7 @@ def chat():
         reply = "Sorry, I do not understand"
 
     return jsonify({"reply": reply})
+
 
 if _name_ == "_main_":
     port = int(os.environ.get("PORT", 10000))
