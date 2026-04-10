@@ -1,63 +1,69 @@
-from flask import Flask, request, jsonify, render_template
-import os
+from flask import Flask, request, jsonify, render_template, redirect, url_for
+import sqlite3
 
 app = Flask(__name__)
 
-SALON_INFO = """
-💅 Nail Salon AI
+SALON_NAME = "Luxury Nail Studio 💅"
+PHONE = "+1 604-123-4567"
+ADDRESS = "123 Beauty Street, Vancouver, BC"
 
-📍 Address:
-123 Beauty Street, Vancouver, BC, Canada
+# ===== DATABASE =====
+def init_db():
+    conn = sqlite3.connect("bookings.db")
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS bookings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            phone TEXT,
+            time TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
 
-📞 Phone:
-+1 604-123-4567
-
-💰 Prices:
-- Manicure: $20
-- Pedicure: $25
-- Gel Nails: $35
-- Nail Art: from $5+
-
-📅 Booking: Tell me what day & time you want
-"""
+init_db()
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    return render_template("index.html", salon=SALON_NAME, phone=PHONE, address=ADDRESS)
 
-@app.route("/chat", methods=["POST"])
-def chat():
+# ===== BOOKING =====
+@app.route("/book", methods=["POST"])
+def book():
     data = request.get_json()
+    name = data.get("name")
+    phone = data.get("phone")
+    time = data.get("time")
 
-    if not data or "message" not in data:
-        return jsonify({"reply": "Please send a message"})
+    conn = sqlite3.connect("bookings.db")
+    c = conn.cursor()
+    c.execute("INSERT INTO bookings (name, phone, time) VALUES (?, ?, ?)", (name, phone, time))
+    conn.commit()
+    conn.close()
 
-    msg = data["message"].lower()
+    return jsonify({"msg": "✅ Booking confirmed! We will contact you soon."})
 
-    if "hi" in msg or "hello" in msg:
-        reply = "Hello 👋 Welcome to Nail Salon 💅\n\n" + SALON_INFO
+# ===== ADMIN =====
+@app.route("/admin")
+def admin():
+    conn = sqlite3.connect("bookings.db")
+    c = conn.cursor()
+    c.execute("SELECT * FROM bookings ORDER BY id DESC")
+    rows = c.fetchall()
+    conn.close()
 
-    elif "price" in msg:
-        reply = "💰 Here are our prices:\n\n" + SALON_INFO
+    return render_template("admin.html", bookings=rows)
 
-    elif "phone" in msg or "contact" in msg:
-        reply = "📞 Contact us:\n\n" + SALON_INFO
-
-    elif "address" in msg or "where" in msg:
-        reply = "📍 Our location:\n\n" + SALON_INFO
-
-    elif "book" in msg:
-        reply = "📅 Sure! Please tell me your preferred date and time 😊"
-
-    elif "service" in msg:
-        reply = "💅 We offer manicure, pedicure, gel nails, nail art!"
-
-    else:
-        reply = "💅 I can help you with booking, prices, address, and phone number."
-
-    return jsonify({"reply": reply})
-
+# ===== DELETE =====
+@app.route("/delete/<int:id>")
+def delete(id):
+    conn = sqlite3.connect("bookings.db")
+    c = conn.cursor()
+    c.execute("DELETE FROM bookings WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("admin"))
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=10000)
